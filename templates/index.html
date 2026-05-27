@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Risk Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Crypto Risk Dashboard</h1>
+      <p>1-year historical simulation &mdash; annualised volatility &amp; Value at Risk</p>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Portfolio editor -->
+  <section class="card editor">
+    <h2>Portfolio Weights</h2>
+    <div class="assets-row">
+      {% for asset in assets %}
+      <div class="asset-block">
+        <label for="w-{{ asset }}">{{ asset }}</label>
+        <div class="inp-wrap">
+          <input type="number" id="w-{{ asset }}" data-asset="{{ asset }}"
+                 min="0" max="100" step="1"
+                 value="{{ '100' if loop.first else '0' }}">
+          <span>%</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="editor-actions">
+      <button id="calc-btn" onclick="calculate()">Calculate Risk</button>
+      <button class="secondary" onclick="setEqual()">Equal Weight</button>
+      <button class="secondary" onclick="clearAll()">Clear</button>
+    </div>
+    <div id="weight-warning" class="warning" style="display:none">
+      Weights sum to <span id="weight-sum"></span>% &mdash; they will be normalised automatically.
+    </div>
+  </section>
+
+  <!-- Metric cards -->
+  <section class="metrics" id="metrics" style="display:none">
+    <div class="metric-card accent-vol">
+      <div class="metric-label">Annualised Volatility</div>
+      <div class="metric-value" id="m-vol">—</div>
+      <div class="metric-sub">Std dev of daily returns &times; &radic;252</div>
+    </div>
+    <div class="metric-card accent-var">
+      <div class="metric-label">1-Day VaR &nbsp;95%</div>
+      <div class="metric-value" id="m-var95">—</div>
+      <div class="metric-sub">Historical simulation percentile</div>
+    </div>
+    <div class="metric-card accent-var">
+      <div class="metric-label">1-Day VaR &nbsp;99%</div>
+      <div class="metric-value" id="m-var99">—</div>
+      <div class="metric-sub">Historical simulation percentile</div>
+    </div>
+  </section>
+
+  <!-- Charts -->
+  <section class="charts" id="charts" style="display:none">
+    <div class="card chart-card chart-wide">
+      <h3>Portfolio Value <span class="chart-hint">(indexed to 100)</span></h3>
+      <canvas id="valueChart"></canvas>
+    </div>
+    <div class="card chart-card">
+      <h3>Daily Return Distribution</h3>
+      <canvas id="distChart"></canvas>
+      <div class="dist-legend">
+        <span class="legend-dot dot-deep"></span> Below VaR 99%
+        <span class="legend-dot dot-mid"></span> 99%&ndash;95%
+        <span class="legend-dot dot-normal"></span> Normal
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
